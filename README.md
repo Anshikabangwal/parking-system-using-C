@@ -1,7 +1,13 @@
 🚗 Parking System using C
 📌 Overview
 
-This project is a Parking Management System implemented in C using the Binary Search Tree (BST) data structure. It efficiently manages parking slots by allowing users to add, search, and display vehicle records in a structured manner.
+This project is a Parking Management System implemented in C using the Binary Search Tree (BST) data structure.
+
+It efficiently manages parking slots by allowing users to:
+
+Add vehicles
+Search records
+Display parking details
 
 The system demonstrates the real-world application of data structures for optimizing parking operations.
 
@@ -15,7 +21,7 @@ The system demonstrates the real-world application of data structures for optimi
 🏗️ Project Structure
 🔹 ParkingSlot (Structure)
 
-Stores:
+Each node stores:
 
 Slot Number (Key)
 Vehicle Number
@@ -29,7 +35,7 @@ deleteSlot() → Remove vehicle (in progress)
 displaySlots() → Inorder traversal
 ⚙️ Technologies Used
 C Programming Language
-Libraries:
+Libraries
 <stdio.h>
 <stdlib.h>
 <string.h>
