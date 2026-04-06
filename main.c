@@ -2,176 +2,144 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Structure for parking slot
-typedef struct ParkingSlot {
-    int slotNumber;
-    char vehicleNumber[20];
-    char ownerName[50];
-    struct ParkingSlot *left;
-    struct ParkingSlot *right;
-} ParkingSlot;
+// structure for parking slot
+struct parking_slot
+{
+    int slot_number;
+    char vehicle_number[20];
+    char owner_name[50];
+    struct parking_slot *left;
+    struct parking_slot *right;
+};
 
-// Create new slot
-ParkingSlot* createSlot(int slotNumber, char vehicleNumber[], char ownerName[]) {
-    ParkingSlot* newSlot = (ParkingSlot*)malloc(sizeof(ParkingSlot));
+// create new slot
+struct parking_slot* create_slot(int slot_number, char vehicle_number[], char owner_name[])
+{
+    
 
-    newSlot->slotNumber = slotNumber;
-    strcpy(newSlot->vehicleNumber, vehicleNumber);
-    strcpy(newSlot->ownerName, ownerName);
+    struct parking_slot *new_slot = (struct parking_slot*)malloc(sizeof(struct parking_slot));
 
-    newSlot->left = NULL;
-    newSlot->right = NULL;
+    new_slot->slot_number = slot_number;
+    strcpy(new_slot->vehicle_number, vehicle_number);
+    strcpy(new_slot->owner_name, owner_name);
 
-    return newSlot;
+    new_slot->left = NULL;
+    new_slot->right = NULL;
+
+    return new_slot;
 }
 
-// Insert slot in BST
-ParkingSlot* insertSlot(ParkingSlot* root, int slotNumber, char vehicleNumber[], char ownerName[]) {
+// insert in tree 
+struct parking_slot* insert_slot(struct parking_slot *root, int slot_number, char vehicle_number[], char owner_name[])
+{
     if (root == NULL)
-        return createSlot(slotNumber, vehicleNumber, ownerName);
+        return create_slot(slot_number, vehicle_number, owner_name);
 
-    if (slotNumber < root->slotNumber)
-        root->left = insertSlot(root->left, slotNumber, vehicleNumber, ownerName);
-    else if (slotNumber > root->slotNumber)
-        root->right = insertSlot(root->right, slotNumber, vehicleNumber, ownerName);
+    if (slot_number < root->slot_number)
+        root->left = insert_slot(root->left, slot_number, vehicle_number, owner_name);
+    else if (slot_number > root->slot_number)
+        root->right = insert_slot(root->right, slot_number, vehicle_number, owner_name);
     else
-        printf("Slot already occupied!\n");
+        printf("slot already occupied!\n");
 
     return root;
 }
 
-// Search slot
-ParkingSlot* searchSlot(ParkingSlot* root, int slotNumber) {
-    if (root == NULL || root->slotNumber == slotNumber)
+// search slot
+struct parking_slot* search_slot(struct parking_slot *root, int slot_number)
+{
+    if (root == NULL || root->slot_number == slot_number)
         return root;
-
-    if (slotNumber < root->slotNumber)
-        return searchSlot(root->left, slotNumber);
-
-    return searchSlot(root->right, slotNumber);
+    // go search in left 
+    if (slot_number < root->slot_number)
+        return search_slot(root->left, slot_number);
+    // go search in right 
+    return search_slot(root->right, slot_number);
 }
 
-// Find minimum value node
-ParkingSlot* findMin(ParkingSlot* root) {
-    while (root && root->left != NULL)
-        root = root->left;
-    return root;
-}
+// display 
+void display_slots(struct parking_slot *root)
+{   
+    // inorder traversal implemented 
+    
+    if (root != NULL)
+    {
+        display_slots(root->left);
 
-// Delete slot
-ParkingSlot* deleteSlot(ParkingSlot* root, int slotNumber) {
-    if (root == NULL)
-        return root;
+        printf("slot %d - vehicle: %s - owner: %s\n",
+               root->slot_number,
+               root->vehicle_number,
+               root->owner_name);
 
-    if (slotNumber < root->slotNumber)
-        root->left = deleteSlot(root->left, slotNumber);
-    else if (slotNumber > root->slotNumber)
-        root->right = deleteSlot(root->right, slotNumber);
-    else {
-        // Node with only one child or no child
-        if (root->left == NULL) {
-            ParkingSlot* temp = root->right;
-            free(root);
-            return temp;
-        } else if (root->right == NULL) {
-            ParkingSlot* temp = root->left;
-            free(root);
-            return temp;
-        }
-
-        // Node with two children
-        ParkingSlot* temp = findMin(root->right);
-
-        root->slotNumber = temp->slotNumber;
-        strcpy(root->vehicleNumber, temp->vehicleNumber);
-        strcpy(root->ownerName, temp->ownerName);
-
-        root->right = deleteSlot(root->right, temp->slotNumber);
-    }
-
-    return root;
-}
-
-// Inorder traversal to display slots
-void displaySlots(ParkingSlot* root) {
-    if (root != NULL) {
-        displaySlots(root->left);
-
-        printf("Slot %d - Vehicle: %s - Owner: %s\n",
-               root->slotNumber,
-               root->vehicleNumber,
-               root->ownerName);
-
-        displaySlots(root->right);
+        display_slots(root->right);
     }
 }
 
-// Main function
-int main() {
-    ParkingSlot* root = NULL;
-    int choice, slotNumber;
-    char vehicleNumber[20], ownerName[50];
+int main()
+{
+    struct parking_slot *root = NULL;
+    int choice, slot_number;
+    char vehicle_number[20], owner_name[50]; 
 
-    while (1) {
-        printf("\n--- Parking Management System ---\n");
-        printf("1. Park Vehicle\n");
-        printf("2. Remove Vehicle\n");
-        printf("3. Search Vehicle\n");
-        printf("4. Display Parking Slots\n");
-        printf("5. Exit\n");
-        printf("Enter your choice: ");
+    while (1)
+    {
+        printf("\n \t\t\t parking management system \n\n");
+        printf("1. park vehicle\n");
+        printf("2. remove vehicle (not implemented) \n");
+        printf("3. search vehicle\n");
+        printf("4. display parking slots\n");
+        printf("5. exit\n");
+        printf("enter your choice: ");
         scanf("%d", &choice);
 
-        switch (choice) {
+        switch (choice)
+        {
             case 1:
-                printf("Enter Slot Number: ");
-                scanf("%d", &slotNumber);
+                printf("enter slot number: ");
+                scanf("%d", &slot_number);
 
-                printf("Enter Vehicle Number: ");
-                scanf("%s", vehicleNumber);
+                printf("enter vehicle number: ");
+                scanf(" %[^\n]", vehicle_number);
 
-                printf("Enter Owner Name: ");
-                scanf(" %[^\n]", ownerName);
+                printf("enter owner name: ");
+                scanf(" %[^\n]", owner_name); 
 
-                root = insertSlot(root, slotNumber, vehicleNumber, ownerName);
+                root = insert_slot(root, slot_number, vehicle_number, owner_name);
                 break;
 
             case 2:
-                printf("Enter Slot Number to Remove: ");
-                scanf("%d", &slotNumber);
-
-                root = deleteSlot(root, slotNumber);
-                printf("Vehicle removed successfully.\n");
+                printf("in progress \n");
                 break;
 
-            case 3: {
-                printf("Enter Slot Number to Search: ");
-                scanf("%d", &slotNumber);
-
-                ParkingSlot* found = searchSlot(root, slotNumber);
-
-                if (found)
-                    printf("Slot %d - Vehicle: %s - Owner: %s\n",
-                           found->slotNumber,
-                           found->vehicleNumber,
-                           found->ownerName);
+            case 3:
+            {
+                printf("enter slot number to search: ");
+                scanf("%d", &slot_number);
+                // calling
+                struct parking_slot *found = search_slot(root, slot_number);
+                
+                if (found != NULL)
+                    printf("slot %d - vehicle: %s - owner: %s\n",
+                           found->slot_number,
+                           found->vehicle_number,
+                           found->owner_name);
                 else
-                    printf("Slot %d is empty.\n", slotNumber);
+                    printf("No vehicle parked \n");
 
                 break;
             }
 
             case 4:
-                printf("\n----- Parking Slots -----\n");
-                displaySlots(root);
+                printf("\n \t \t parking slots\t \t \n");
+                display_slots(root);
                 break;
 
             case 5:
-                printf("Exiting...\n");
+                printf("exiting...\n");
                 exit(0);
 
             default:
-                printf("Invalid choice!\n");
+                printf("please select valid choice\n");
         }
     }
 
