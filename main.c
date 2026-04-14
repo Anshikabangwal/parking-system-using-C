@@ -2,144 +2,276 @@
 #include <stdlib.h>
 #include <string.h>
 
-// structure for parking slot
-struct parking_slot
-{
-    int slot_number;
+#define MAX_AREAS 3
+#define MAX_SLOTS 25
+#define TABLE_SIZE 100
+
+// ---------------- HASH STRUCTURE ----------------
+struct hash_node {
     char vehicle_number[20];
-    char owner_name[50];
-    struct parking_slot *left;
-    struct parking_slot *right;
+    int area_index;
+    int slot_index;
+    struct hash_node *next;
 };
 
-// create new slot
-struct parking_slot* create_slot(int slot_number, char vehicle_number[], char owner_name[])
-{
-    
+struct hash_node* hash_table[TABLE_SIZE];
 
-    struct parking_slot *new_slot = (struct parking_slot*)malloc(sizeof(struct parking_slot));
-
-    new_slot->slot_number = slot_number;
-    strcpy(new_slot->vehicle_number, vehicle_number);
-    strcpy(new_slot->owner_name, owner_name);
-
-    new_slot->left = NULL;
-    new_slot->right = NULL;
-
-    return new_slot;
+// hash function
+int hash_function(char *vehicle) {
+    int sum = 0;
+    for (int i = 0; vehicle[i] != '\0'; i++)
+        sum += vehicle[i];
+    return sum % TABLE_SIZE;
 }
 
-// insert in tree 
-struct parking_slot* insert_slot(struct parking_slot *root, int slot_number, char vehicle_number[], char owner_name[])
-{
-    if (root == NULL)
-        return create_slot(slot_number, vehicle_number, owner_name);
+// insert into hash
+void insert_hash(char *vehicle, int area, int slot) {
+    int index = hash_function(vehicle);
 
-    if (slot_number < root->slot_number)
-        root->left = insert_slot(root->left, slot_number, vehicle_number, owner_name);
-    else if (slot_number > root->slot_number)
-        root->right = insert_slot(root->right, slot_number, vehicle_number, owner_name);
-    else
-        printf("slot already occupied!\n");
+    struct hash_node *new_node = (struct hash_node*)malloc(sizeof(struct hash_node));
+    strcpy(new_node->vehicle_number, vehicle);
+    new_node->area_index = area;
+    new_node->slot_index = slot;
+    new_node->next = hash_table[index];
 
-    return root;
+    hash_table[index] = new_node;
 }
 
-// search slot
-struct parking_slot* search_slot(struct parking_slot *root, int slot_number)
-{
-    if (root == NULL || root->slot_number == slot_number)
-        return root;
-    // go search in left 
-    if (slot_number < root->slot_number)
-        return search_slot(root->left, slot_number);
-    // go search in right 
-    return search_slot(root->right, slot_number);
+// search in hash
+struct hash_node* search_hash(char *vehicle) {
+    int index = hash_function(vehicle);
+
+    struct hash_node *temp = hash_table[index];
+    while (temp != NULL) {
+        if (strcmp(temp->vehicle_number, vehicle) == 0)
+            return temp;
+        temp = temp->next;
+    }
+    return NULL;
 }
 
-// display 
-void display_slots(struct parking_slot *root)
-{   
-    // inorder traversal implemented 
-    
-    if (root != NULL)
-    {
-        display_slots(root->left);
+// delete from hash
+void delete_hash(char *vehicle) {
+    int index = hash_function(vehicle);
 
-        printf("slot %d - vehicle: %s - owner: %s\n",
-               root->slot_number,
-               root->vehicle_number,
-               root->owner_name);
+    struct hash_node *temp = hash_table[index];
+    struct hash_node *prev = NULL;
 
-        display_slots(root->right);
+    while (temp != NULL) {
+        if (strcmp(temp->vehicle_number, vehicle) == 0) {
+            if (prev == NULL)
+                hash_table[index] = temp->next;
+            else
+                prev->next = temp->next;
+
+            free(temp);
+            return;
+        }
+        prev = temp;
+        temp = temp->next;
     }
 }
 
-int main()
-{
-    struct parking_slot *root = NULL;
-    int choice, slot_number;
-    char vehicle_number[20], owner_name[50]; 
+// ---------------- ORIGINAL STRUCTURES ----------------
+struct slot {
+    int occupied;
+    char vehicle_number[20];
+    char owner_name[50];
+};
 
-    while (1)
-    {
-        printf("\n \t\t\t parking management system \n\n");
-        printf("1. park vehicle\n");
-        printf("2. remove vehicle (not implemented) \n");
-        printf("3. search vehicle\n");
-        printf("4. display parking slots\n");
-        printf("5. exit\n");
-        printf("enter your choice: ");
+struct area {
+    char name;
+    int free_slots;
+    struct slot slots[MAX_SLOTS];
+};
+
+int graph[MAX_AREAS][MAX_AREAS] = {
+    {0,1,1},
+    {1,0,1},
+    {1,1,0}
+};
+
+struct area areas[MAX_AREAS];
+
+// initialize
+void initialize() {
+    for (int i = 0; i < TABLE_SIZE; i++)
+        hash_table[i] = NULL;
+
+    for (int i = 0; i < MAX_AREAS; i++) {
+        areas[i].name = 'A' + i;
+        areas[i].free_slots = MAX_SLOTS;
+
+        for (int j = 0; j < MAX_SLOTS; j++)
+            areas[i].slots[j].occupied = 0;
+    }
+}
+
+// find area
+int find_area() {
+    for (int i = 0; i < MAX_AREAS; i++) {
+        if (areas[i].free_slots > 0)
+            return i;
+    }
+    return -1;
+}
+
+// park vehicle
+void park_vehicle() {
+    char vehicle[20], owner[50];
+
+    printf("Enter vehicle number: ");
+    scanf(" %[^\n]", vehicle);
+
+    // prevent duplicate entry
+    if (search_hash(vehicle) != NULL) {
+        printf("Vehicle already parked!\n");
+        return;
+    }
+
+    printf("Enter owner name: ");
+    scanf(" %[^\n]", owner);
+
+    int area_index = find_area();
+
+    if (area_index == -1) {
+        printf("All parking areas are FULL!\n");
+        return;
+    }
+
+    struct area *a = &areas[area_index];
+
+    for (int i = 0; i < MAX_SLOTS; i++) {
+        if (!a->slots[i].occupied) {
+            a->slots[i].occupied = 1;
+            strcpy(a->slots[i].vehicle_number, vehicle);
+            strcpy(a->slots[i].owner_name, owner);
+
+            a->free_slots--;
+
+            // insert into hash
+            insert_hash(vehicle, area_index, i);
+
+            printf("\nVehicle parked successfully!\n");
+            printf("Area: %c\nSlot: %d\n", a->name, i+1);
+            return;
+        }
+    }
+}
+
+// remove vehicle
+void remove_vehicle() {
+    char vehicle[20];
+
+    printf("Enter vehicle number: ");
+    scanf(" %[^\n]", vehicle);
+
+    struct hash_node *found = search_hash(vehicle);
+
+    if (found == NULL) {
+        printf("Vehicle not found!\n");
+        return;
+    }
+
+    int i = found->area_index;
+    int j = found->slot_index;
+
+    areas[i].slots[j].occupied = 0;
+    areas[i].free_slots++;
+
+    delete_hash(vehicle);
+
+    printf("Vehicle removed from Area %c, Slot %d\n",
+           areas[i].name, j+1);
+}
+
+// search vehicle
+void search_vehicle() {
+    char vehicle[20];
+
+    printf("Enter vehicle number: ");
+    scanf(" %[^\n]", vehicle);
+
+    struct hash_node *found = search_hash(vehicle);
+
+    if (found == NULL) {
+        printf("Vehicle not found!\n");
+        return;
+    }
+
+    int i = found->area_index;
+    int j = found->slot_index;
+
+    printf("Found!\nArea: %c\nSlot: %d\nOwner: %s\n",
+           areas[i].name,
+           j+1,
+           areas[i].slots[j].owner_name);
+}
+
+// display status
+void display_status() {
+    printf("\n--- Parking Status ---\n");
+
+    for (int i = 0; i < MAX_AREAS; i++) {
+        printf("Area %c → %d/%d occupied (%d free)\n",
+               areas[i].name,
+               MAX_SLOTS - areas[i].free_slots,
+               MAX_SLOTS,
+               areas[i].free_slots);
+    }
+}
+
+// area details
+void area_details() {
+    int choice;
+    printf("Select Area (1-A, 2-B, 3-C): ");
+    scanf("%d", &choice);
+
+    if (choice < 1 || choice > 3) {
+        printf("Invalid choice\n");
+        return;
+    }
+
+    struct area *a = &areas[choice - 1];
+
+    printf("\n--- Area %c Details ---\n", a->name);
+
+    for (int i = 0; i < MAX_SLOTS; i++) {
+        if (a->slots[i].occupied) {
+            printf("Slot %d → Occupied (%s - %s)\n",
+                   i+1,
+                   a->slots[i].vehicle_number,
+                   a->slots[i].owner_name);
+        } else {
+            printf("Slot %d → Free\n", i+1);
+        }
+    }
+}
+
+// main
+int main() {
+    int choice;
+    initialize();
+
+    while (1) {
+        printf("\nSMART PARKING SYSTEM\n");
+        printf("1. Park Vehicle\n");
+        printf("2. Remove Vehicle\n");
+        printf("3. Search Vehicle\n");
+        printf("4. Display Status\n");
+        printf("5. Area Details\n");
+        printf("6. Exit\n");
+        printf("Enter choice: ");
         scanf("%d", &choice);
 
-        switch (choice)
-        {
-            case 1:
-                printf("enter slot number: ");
-                scanf("%d", &slot_number);
-
-                printf("enter vehicle number: ");
-                scanf(" %[^\n]", vehicle_number);
-
-                printf("enter owner name: ");
-                scanf(" %[^\n]", owner_name); 
-
-                root = insert_slot(root, slot_number, vehicle_number, owner_name);
-                break;
-
-            case 2:
-                printf("in progress \n");
-                break;
-
-            case 3:
-            {
-                printf("enter slot number to search: ");
-                scanf("%d", &slot_number);
-                // calling
-                struct parking_slot *found = search_slot(root, slot_number);
-                
-                if (found != NULL)
-                    printf("slot %d - vehicle: %s - owner: %s\n",
-                           found->slot_number,
-                           found->vehicle_number,
-                           found->owner_name);
-                else
-                    printf("No vehicle parked \n");
-
-                break;
-            }
-
-            case 4:
-                printf("\n \t \t parking slots\t \t \n");
-                display_slots(root);
-                break;
-
-            case 5:
-                printf("exiting...\n");
-                exit(0);
-
-            default:
-                printf("please select valid choice\n");
+        switch (choice) {
+            case 1: park_vehicle(); break;
+            case 2: remove_vehicle(); break;
+            case 3: search_vehicle(); break;
+            case 4: display_status(); break;
+            case 5: area_details(); break;
+            case 6: exit(0);
+            default: printf("Invalid choice\n");
         }
     }
 
