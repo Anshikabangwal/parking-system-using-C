@@ -1,63 +1,121 @@
-# Parking System using C
+🚗✨ Smart Parking System using C
+🌟 Overview
 
-## Overview
+The Smart Parking System is a console-based application developed in C that efficiently manages parking across multiple areas using advanced data structures like Hash Tables and Graph Representation.
 
-This project is a Parking Management System implemented in C using the Binary Search Tree (BST) data structure.
+It enables fast vehicle lookup, prevents duplicate entries, and ensures optimal utilization of parking slots — making it a practical simulation of a real-world smart parking solution.
 
-It efficiently manages parking slots by allowing users to add, search, and display vehicle records in a structured manner.
+🎯 Key Features
 
-The system demonstrates the real-world application of data structures for optimizing parking operations.
+✨ Park Vehicle with automatic slot allocation
+🔍 Instant Vehicle Search using Hashing (O(1) time complexity)
+❌ Remove Vehicle with quick deallocation
+📊 Real-time Parking Status (Area-wise)
+📍 Detailed View of Individual Parking Areas
+🚫 Duplicate Vehicle Entry Prevention
+🏢 Multiple Parking Areas (A, B, C)
+🔗 Graph-based Area Connectivity (for future smart routing)
 
+🧠 System Architecture
+🚘 Parking Slot Structure
 
-## Features
+Each slot stores:
 
-- Park Vehicle (Insert into BST)
-- Search Vehicle by Slot Number
-- Display All Occupied Slots (Sorted Order)
-- Delete Vehicle (In Progress)
-- AVL Tree Balancing (Planned)
-- Fixed Slot Management (Planned)
+Occupancy Status
+Vehicle Number
+Owner Name
+🏢 Parking Area Structure
 
+Each area contains:
 
-## Project Structure
+Area Name (A, B, C)
+Number of Free Slots
+Array of 25 Parking Slots
+⚡ Hash Table (Core Optimization)
 
-ParkingSlot (Structure)
+Used for fast vehicle tracking
 
 Stores:
-- Slot Number (Key)
-- Vehicle Number
-- Owner Name
-- Left pointer
-- Right pointer
 
+Vehicle Number (Key 🔑)
+Area Index
+Slot Index
+Uses Linked List Chaining for collision handling
+🔗 Graph Representation
 
-Core Functions
+Parking areas are connected using an adjacency matrix:
 
-- createSlot() → Create new node
-- insertSlot() → Add vehicle
-- searchSlot() → Find vehicle
-- deleteSlot() → Remove vehicle (in progress)
-- displaySlots() → Inorder traversal
+A ↔ B ↔ C
 
+➡️ Can be extended for:
 
-## Technologies Used
+Smart navigation
+Nearest slot detection
+Traffic optimization
+⚙️ Core Functionalities
+Function	Description
+initialize()	Setup parking areas & hash table
+hash_function()	Generate index from vehicle number
+insert_hash()	Store vehicle location
+search_hash()	Fast vehicle lookup
+delete_hash()	Remove vehicle record
+find_area()	Find available parking area
+park_vehicle()	Allocate slot
+remove_vehicle()	Free slot
+search_vehicle()	Display vehicle info
+display_status()	Show occupancy status
+area_details()	Slot-wise detailed view
+🛠️ Technologies Used
 
-C Programming Language
+💻 Programming Language: C
 
-Libraries:
-- stdio.h
-- stdlib.h
-- string.h
+📚 Libraries:
 
+stdio.h
+stdlib.h
+string.h
+🚀 Working Flow
 
-## Limitations
+1️⃣ System initializes all parking areas and hash table
+2️⃣ User selects an operation from the menu
+3️⃣ System processes request:
 
-- BST may become unbalanced (O(n) in worst case)
-- No fixed slot capacity
-- Data not stored permanently
-- Console-based interface
+Park → Assign slot
+Search → Instant lookup
+Remove → Free slot
+4️⃣ Data structures update dynamically
+📊 Sample Menu
+SMART PARKING SYSTEM
+1. Park Vehicle
+2. Remove Vehicle
+3. Search Vehicle
+4. Display Status
+5. Area Details
+6. Exit
+⚡ Advantages
 
+✅ Fast Search (O(1) using Hashing)
+✅ Efficient Space Utilization
+✅ Structured Multi-Area Management
+✅ Scalable Design for Future Expansion
+✅ Simple & User-Friendly Interface
 
-## Note
+⚠️ Limitations
+Fixed Areas (3) and Slots (25 per area)
+Console-based (No GUI)
+No persistent storage (Data resets on restart)
+Graph not fully utilized yet
+🔮 Future Enhancements
 
-This project is developed as part of academic learning to demonstrate the use of Data Structures (BST) in solving real-world problems.
+🚀 Dynamic parking allocation
+📍 Smart slot selection using Graph algorithms
+🧠 Machine Learning for demand prediction
+🌐 Web/App-based interface
+💾 Database integration for permanent storage
+📱 Online booking system
+
+📌 Conclusion
+
+This project showcases how Data Structures like Hashing and Graphs can be effectively used to solve real-world problems such as parking management.
+
+It serves as a strong foundation for building advanced Smart City Parking Solutions.
